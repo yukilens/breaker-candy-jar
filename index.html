@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ブレーカー・キャンディジャー</title>
+<meta name="description" content="家電の消費電力をキャンディの粒で積み上げて、30A（3,000W）の目安を超えそうか確かめるシミュレーター">
+<meta name="theme-color" content="#fff4f8">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="jar-col">
+    <div id="mainJar" class="jar-box" role="img" aria-label="使用量のキャンディジャー"></div>
+    <div class="caption" id="jarCaption">1粒 = 1pt = 100W</div>
+  </div>
+  <div class="meter">
+    <h1>ブレーカー・キャンディジャー</h1>
+    <div class="big"><span id="pt">0.00</span><span class="of"> / 30</span></div>
+    <div class="watts" id="watts">0W / 3,000W</div>
+    <div class="status" id="status" aria-live="polite"></div>
+  </div>
+</header>
+
+<main>
+  <p class="using" id="using"></p>
+  <p class="hint">カードをタップで 使用中／OFF。「もし動かしたら？」で追加後を試せます。</p>
+  <div class="grid" id="grid"></div>
+
+  <div class="actions">
+    <button id="allOff">全部OFF</button>
+    <button id="resetDefault">おすすめ初期状態</button>
+    <button id="editToggle" aria-pressed="false">W を編集</button>
+  </div>
+  <div class="edit-extra" id="editExtra" hidden>
+    <p>各カードの数字を書き換えると保存されます（実測値に置き換え用）。</p>
+    <button id="resetWatts">W を初期値に戻す</button>
+  </div>
+
+  <p class="note">3,000W（30A）は家全体の簡易目安です。安全を保証するものではありません。回路ごとの 20A 制限、電源を入れた瞬間の大きな電流、暖房などの自動 ON/OFF、実際の消費電力の変化などで、目安より少なくてもブレーカーが落ちることがあります。</p>
+</main>
+
+<div class="sheet" id="sheet" hidden></div>
+
+<script src="calc.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
