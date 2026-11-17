@@ -45,9 +45,10 @@
     var out = [], c = 0;
     items.forEach(function (it) {
       var w = it.watts;
+      var n = 0;
       while (w > 0) {
         var s = Math.min(100, w);
-        out.push({ center: (c + s / 2) / 100, size: s / 100, color: it.color, ghost: !!it.ghost });
+        out.push({ key: (it.key || '') + ':' + (n++), center: (c + s / 2) / 100, size: s / 100, color: it.color, ghost: !!it.ghost });
         c += s; w -= s;
       }
     });
@@ -102,7 +103,7 @@
       '<ellipse class="glass" cx="' + cx + '" cy="' + (g.footBottom - s * 0.25) + '" rx="' + g.iw * 0.3 + '" ry="' + s * 0.25 + '"/>';
   }
 
-  function candiesSVG(list, g, maxRows) {
+  function candiesSVG(list, g, maxRows, posOut) {
     var s = g.s, html = '';
     list.forEach(function (cd, i) {
       var row = Math.floor(cd.center / g.cols);
@@ -112,7 +113,8 @@
       var x = g.x0 + col * s + jx, y = g.yb - (row + 0.5) * s + jy;
       var r = Math.max(s * 0.13, s * 0.47 * Math.sqrt(cd.size));
       var cls = 'candy' + (cd.ghost ? ' ghost' : '') + (row >= g.rows ? ' spill' : '');
-      html += '<g class="' + cls + '"><circle cx="' + x.toFixed(2) + '" cy="' + y.toFixed(2) + '" r="' + r.toFixed(2) + '" fill="' + cd.color + '"/>' +
+      if (posOut) posOut[cd.key] = { x: x, y: y, i: i };
+      html += '<g class="' + cls + '" data-k="' + cd.key + '"><circle cx="' + x.toFixed(2) + '" cy="' + y.toFixed(2) + '" r="' + r.toFixed(2) + '" fill="' + cd.color + '"/>' +
         '<circle class="shine" cx="' + (x - r * 0.35).toFixed(2) + '" cy="' + (y - r * 0.35).toFixed(2) + '" r="' + (r * 0.3).toFixed(2) + '"/></g>';
     });
     return html;
@@ -127,11 +129,63 @@
       html += '<line class="cap" x1="' + (g.bodyL + g.s * 0.3) + '" x2="' + (g.bodyR - g.s * 0.3) + '" y1="' + g.yCap + '" y2="' + g.yCap + '"/>' +
         '<text class="cap-label" x="' + (g.bodyR - g.s * 0.35) + '" y="' + (g.yCap - g.s * 0.2) + '" font-size="' + g.s * 0.6 + '" text-anchor="end">30</text>';
     }
-    html += candiesSVG(candyList(opt.items), g, opt.rows + (opt.extraRows || 0));
+    html += candiesSVG(candyList(opt.items), g, opt.rows + (opt.extraRows || 0), opt.posOut);
+    if (opt.geomOut) opt.geomOut.g = g;
     html += '<path class="glass front" d="' + bodyPath(g) + '"/>' +
       '<path class="hl" d="M' + (g.bodyL + g.s * 0.45) + ',' + (g.shoulder + g.s * 1.3) + ' L' + (g.bodyL + g.s * 0.45) + ',' + (g.bodyBottom - g.s * 1.2) + '"/>' +
       lidSVG(g) + '</svg>';
     return html;
+  }
+
+  // ---------- 降ってきて溜まる演出 ----------
+  // 新しい粒＝ジャーの口から順に落下して着地。位置が変わった粒＝下へ詰める。
+  var prevPos = {};
+  var pourUntil = 0, pourTimer = null;
+  var reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  function animateJar(pos, g) {
+    var svg = document.querySelector('#mainJar svg');
+    var old = prevPos;
+    prevPos = pos;
+    if (reduceMotion || !svg || !svg.animate || !g) return;
+    var keys = Object.keys(pos).sort(function (a, b) { return pos[a].i - pos[b].i; });
+    var drops = 0, lastEnd = 0, topY = -30;
+    keys.forEach(function (k) {
+      var el = svg.querySelector('[data-k="' + k + '"]');
+      if (!el) return;
+      var p = pos[k], o = old[k];
+      if (!o) {
+        var delay = Math.min(drops * 55, 1400);
+        var dur = 520 + Math.min(260, (p.y - topY) * 1.2);
+        var dx = g.cx - p.x + (((drops * 29) % 7) - 3) * 1.5;
+        var dy = topY - p.y;
+        el.animate([
+          { transform: 'translate(' + dx + 'px,' + dy + 'px)', opacity: 0, easing: 'linear' },
+          { transform: 'translate(' + dx * 0.9 + 'px,' + dy * 0.93 + 'px)', opacity: 1, offset: 0.08, easing: 'cubic-bezier(.5,0,.85,.6)' },
+          { transform: 'translate(0px,0px)', offset: 0.72, easing: 'ease-out' },
+          { transform: 'translate(0px,-4px) scale(1.06,.94)', offset: 0.86, easing: 'ease-in' },
+          { transform: 'translate(0px,0px)' }
+        ], { duration: dur, delay: delay, fill: 'backwards' });
+        drops++;
+        lastEnd = Math.max(lastEnd, delay + dur);
+      } else if (Math.abs(o.x - p.x) > 0.5 || Math.abs(o.y - p.y) > 0.5) {
+        el.animate([
+          { transform: 'translate(' + (o.x - p.x) + 'px,' + (o.y - p.y) + 'px)', easing: 'cubic-bezier(.5,0,.8,.5)' },
+          { transform: 'translate(0px,0px)', offset: 0.8, easing: 'ease-out' },
+          { transform: 'translate(0px,-2px)', offset: 0.9 },
+          { transform: 'translate(0px,0px)' }
+        ], { duration: 420 });
+      }
+    });
+    if (drops) {
+      pourUntil = Date.now() + lastEnd;
+      svg.classList.add('pouring');
+      clearTimeout(pourTimer);
+      pourTimer = setTimeout(function () {
+        var s = document.querySelector('#mainJar svg');
+        if (s) s.classList.remove('pouring');
+      }, lastEnd);
+    }
   }
 
   // ---------- 描画 ----------
@@ -153,14 +207,17 @@
       var p = C.previewChange(A, state, preview.id, preview.modeId);
       jarTotal = p.after;
       items = C.activeItems(A, p.next).filter(function (i) { return i.id !== preview.id; })
-        .map(function (i) { return { watts: i.watts, color: byId[i.id].color }; });
-      items.push({ watts: C.modeWatts(byId[preview.id], preview.modeId, state), color: byId[preview.id].color, ghost: true });
+        .map(function (i) { return { key: i.id, watts: i.watts, color: byId[i.id].color }; });
+      items.push({ key: preview.id, watts: C.modeWatts(byId[preview.id], preview.modeId, state), color: byId[preview.id].color, ghost: true });
     } else {
-      items = C.activeItems(A, state).map(function (i) { return { watts: i.watts, color: byId[i.id].color }; });
+      items = C.activeItems(A, state).map(function (i) { return { key: i.id, watts: i.watts, color: byId[i.id].color }; });
     }
     var jl = C.level(jarTotal);
+    var pos = {}, go = {};
     $('mainJar').innerHTML = jarSVG({ cols: 6, rows: 5, s: 16, items: items, capLine: true, extraRows: 3, topPad: 34,
-      cls: 'main lv-' + jl + (jl === 'over' ? ' popped' : '') });
+      posOut: pos, geomOut: go,
+      cls: 'main lv-' + jl + (jl === 'over' ? ' popped' : '') + (Date.now() < pourUntil ? ' pouring' : '') });
+    animateJar(pos, go.g);
     $('jarCaption').textContent = preview ? 'うすい粒＝追加分（予測）' : '1粒 = 1pt = 100W';
 
     // 使用中リスト

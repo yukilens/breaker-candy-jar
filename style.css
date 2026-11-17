@@ -87,6 +87,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .jar.main .candy.spill circle:first-child { stroke: var(--over); stroke-width: 1; }
 .jar .lid { transition: transform .45s cubic-bezier(.3, 1.6, .5, 1); transform-box: fill-box; transform-origin: 50% 100%; }
 .jar.popped .lid { transform: translate(22px, -26px) rotate(24deg); }
+.jar.main.pouring:not(.popped) .lid { transform: translate(-16px, -14px) rotate(-30deg); }
+.jar.main .candy { transform-box: fill-box; transform-origin: 50% 100%; }
 .jar.mini-jar .glass { stroke-width: 1.1; }
 .jar.mini-jar .hl { stroke-width: 1.6; }
 
