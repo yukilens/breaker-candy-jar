@@ -5,12 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ブレーカー・キャンディジャー</title>
 <meta name="description" content="家電の消費電力をキャンディの粒で積み上げて、30A（3,000W）の目安を超えそうか確かめるシミュレーター">
-<meta name="theme-color" content="#fff4f8">
+<meta name="theme-color" content="#f2ebdf">
+<script>
+  // 背景テーマを先に当てる（ちらつき防止）。既定は beige
+  try { var t = localStorage.getItem('breaker-candy-jar:theme'); if (t === 'pink' || t === 'blue') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="hero">
-  <h1>ブレーカー・キャンディジャー</h1>
+  <div class="hero-top">
+    <h1>ブレーカー・キャンディジャー</h1>
+    <div class="themes" role="group" aria-label="背景色">
+      <button class="theme-dot" data-theme-pick="beige" style="--sw:#e6d8bf" aria-label="ベージュ"><span></span></button>
+      <button class="theme-dot" data-theme-pick="pink" style="--sw:#ffc7da" aria-label="ピンク"><span></span></button>
+      <button class="theme-dot" data-theme-pick="blue" style="--sw:#bcd9f7" aria-label="ブルー"><span></span></button>
+    </div>
+  </div>
   <div id="mainJar" class="jar-box" role="img" aria-label="使用量のキャンディジャー"></div>
   <div class="caption" id="jarCaption">1粒 = 1pt = 100W</div>
   <div class="big"><span class="js-pt">0.00</span><span class="of"> / 30</span></div>

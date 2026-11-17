@@ -362,6 +362,26 @@
     state.watts = {}; save(); render();
   });
 
+  // 背景テーマ（見る人ごとの好み。保存できなくても既定の beige で動く）
+  var THEME_KEY = 'breaker-candy-jar:theme';
+  var THEME_COLOR = { beige: '#f2ebdf', pink: '#fff0f5', blue: '#eef5fd' };
+  function applyTheme(name) {
+    if (!THEME_COLOR[name]) name = 'beige';
+    if (name === 'beige') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = name;
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', THEME_COLOR[name]);
+    document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.themePick === name);
+    });
+  }
+  document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      applyTheme(b.dataset.themePick);
+      try { localStorage.setItem(THEME_KEY, b.dataset.themePick); } catch (e) { /* noop */ }
+    });
+  });
+  applyTheme(document.documentElement.dataset.theme || 'beige');
+
   // 大きいジャーが画面から外れたら、上に小さいバーを出す
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (es) {

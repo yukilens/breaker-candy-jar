@@ -24,9 +24,9 @@
       modes: [{ id: 'on', label: '概算', watts: 200 }] }
   ];
 
-  // 「おすすめ初期状態」：ストーブ通常＋冷蔵庫・照明など
-  var DEFAULT_ON = { stove: true, base: true };
-  var DEFAULT_MODE = {};
+  // 「おすすめ初期状態」：ストーブ通常＋PC 中＋冷蔵庫・照明など
+  var DEFAULT_ON = { stove: true, pc: true, base: true };
+  var DEFAULT_MODE = { stove: 'normal', pc: 'mid' };
 
   root.APP_DATA = { APPLIANCES: APPLIANCES, DEFAULT_ON: DEFAULT_ON, DEFAULT_MODE: DEFAULT_MODE };
 })(this);

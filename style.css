@@ -1,37 +1,55 @@
+/* 背景テーマ：beige（既定・落ち着いた高級感）／pink／blue。右上のまるで切り替え */
 :root {
-  --bg: #fff4f8;
+  --bg: #f2ebdf;
+  --bg2: #e9dfcd;
+  --panel: #fbf8f2;
+  --ink: #3a3128;
+  --sub: #8a7a66;
+  --line: #e0d3bf;
+  --glass: #a3947f;
+  --glass-fill: rgba(255, 252, 245, .55);
+  --accent: #b08d57;
+  --ok: #4f8a6f;
+  --warn: #c07a12;
+  --over: #c8394d;
+  --warn-bg: #f7e8cc;
+  --over-bg: #f6dcdc;
+  --ok-bg: #e2ecdf;
+  color-scheme: light;
+}
+:root[data-theme="pink"] {
+  --bg: #fff0f5;
+  --bg2: #ffe1ec;
   --panel: #ffffff;
   --ink: #3b2f3a;
   --sub: #8a7b88;
-  --line: #f0dce6;
+  --line: #f3d9e4;
   --glass: #9fb4c8;
   --glass-fill: rgba(225, 240, 250, .45);
+  --accent: #ff6f9c;
   --ok: #2f9e8f;
   --warn: #e08a00;
   --over: #e0344d;
   --warn-bg: #fff3dc;
   --over-bg: #ffe3e7;
   --ok-bg: #e2f6f2;
-  --accent: #ff6f9c;
-  color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1f1a22;
-    --panel: #2b2430;
-    --ink: #f4ecf2;
-    --sub: #b6a8b4;
-    --line: #43384a;
-    --glass: #8aa3b8;
-    --glass-fill: rgba(150, 180, 210, .12);
-    --ok: #4cc9b6;
-    --warn: #ffb238;
-    --over: #ff6b80;
-    --warn-bg: #3d3020;
-    --over-bg: #45232b;
-    --ok-bg: #1f3a36;
-    color-scheme: dark;
-  }
+:root[data-theme="blue"] {
+  --bg: #eef5fd;
+  --bg2: #dcebfb;
+  --panel: #ffffff;
+  --ink: #2c3440;
+  --sub: #73849a;
+  --line: #d5e3f3;
+  --glass: #8fa8c4;
+  --glass-fill: rgba(235, 245, 255, .5);
+  --accent: #5b9be6;
+  --ok: #2f9e8f;
+  --warn: #e08a00;
+  --over: #e0344d;
+  --warn-bg: #fff3dc;
+  --over-bg: #ffe3e7;
+  --ok-bg: #e2f6f2;
 }
 
 * { box-sizing: border-box; }
@@ -49,10 +67,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ---------- 上部（ジャー＋数字） ---------- */
 /* 主役：大きいジャーを中央に */
 .hero {
+  position: relative;
   text-align: center;
   padding: 14px 16px 10px;
-  background: radial-gradient(ellipse 70% 60% at 50% 45%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%);
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, var(--bg2), transparent 72%);
 }
+.hero-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: -6px -6px 0 0; }
+.hero-top h1 { text-align: left; }
+.themes { display: flex; gap: 0; flex: 0 0 auto; }
+.theme-dot {
+  width: 34px; height: 34px; padding: 0; border: 0; background: none; border-radius: 50%;
+  display: grid; place-items: center;
+}
+.theme-dot span {
+  width: 20px; height: 20px; border-radius: 50%; background: var(--sw);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12);
+}
+.theme-dot[aria-pressed="true"] span { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--ink); }
+.theme-dot:focus-visible { outline: 2px solid var(--accent); }
 .hero h1 { font-size: 14px; margin: 0; color: var(--sub); font-weight: 700; letter-spacing: .04em; }
 .hero .jar-box svg { width: min(290px, 68vw); height: auto; display: block; margin: 0 auto; overflow: visible; }
 .caption { font-size: 12px; color: var(--sub); margin-top: -2px; }
