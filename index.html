@@ -9,18 +9,22 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <div class="jar-col">
-    <div id="mainJar" class="jar-box" role="img" aria-label="使用量のキャンディジャー"></div>
-    <div class="caption" id="jarCaption">1粒 = 1pt = 100W</div>
-  </div>
-  <div class="meter">
-    <h1>ブレーカー・キャンディジャー</h1>
-    <div class="big"><span id="pt">0.00</span><span class="of"> / 30</span></div>
-    <div class="watts" id="watts">0W / 3,000W</div>
-    <div class="status" id="status" aria-live="polite"></div>
-  </div>
+<header class="hero">
+  <h1>ブレーカー・キャンディジャー</h1>
+  <div id="mainJar" class="jar-box" role="img" aria-label="使用量のキャンディジャー"></div>
+  <div class="caption" id="jarCaption">1粒 = 1pt = 100W</div>
+  <div class="big"><span class="js-pt">0.00</span><span class="of"> / 30</span></div>
+  <div class="watts js-watts">0W / 3,000W</div>
+  <div class="status js-status" aria-live="polite"></div>
 </header>
+
+<div class="mini-bar" id="miniBar" aria-hidden="true">
+  <div id="miniJar" class="jar-box"></div>
+  <div class="mb-nums">
+    <div><span class="mb-pt js-pt">0.00</span><span class="of"> / 30</span> <span class="mb-w js-watts"></span></div>
+    <div class="status js-status"></div>
+  </div>
+</div>
 
 <main>
   <p class="using" id="using"></p>

@@ -47,22 +47,37 @@ body {
 button { font: inherit; color: inherit; cursor: pointer; }
 
 /* ---------- 上部（ジャー＋数字） ---------- */
-.top {
-  position: sticky; top: 0; z-index: 5;
-  display: flex; gap: 12px; align-items: center;
-  padding: 10px 16px 8px;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+/* 主役：大きいジャーを中央に */
+.hero {
+  text-align: center;
+  padding: 14px 16px 10px;
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%);
+}
+.hero h1 { font-size: 14px; margin: 0; color: var(--sub); font-weight: 700; letter-spacing: .04em; }
+.hero .jar-box svg { width: min(290px, 68vw); height: auto; display: block; margin: 0 auto; overflow: visible; }
+.caption { font-size: 12px; color: var(--sub); margin-top: -2px; }
+.big { font-size: 56px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.big .of { font-size: 26px; color: var(--sub); font-weight: 700; }
+.watts { font-size: 16px; color: var(--sub); font-variant-numeric: tabular-nums; }
+@media (min-width: 700px) and (min-height: 760px) { .hero .jar-box svg { width: 320px; } }
+
+/* スクロール時だけ出る小さいバー */
+.mini-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 6;
+  display: flex; gap: 10px; align-items: center;
+  padding: 6px 16px;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--line);
+  transform: translateY(-110%); transition: transform .25s ease;
 }
-.jar-col { flex: 0 0 auto; width: 104px; text-align: center; }
-.jar-box svg { width: 104px; height: auto; display: block; overflow: visible; }
-.caption { font-size: 10px; color: var(--sub); margin-top: -4px; white-space: nowrap; }
-.meter { flex: 1 1 auto; min-width: 0; }
-.meter h1 { font-size: 13px; margin: 0 0 2px; color: var(--sub); font-weight: 700; letter-spacing: .02em; }
-.big { font-size: 44px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
-.big .of { font-size: 22px; color: var(--sub); font-weight: 700; }
-.watts { font-size: 15px; color: var(--sub); font-variant-numeric: tabular-nums; }
+body.show-mini .mini-bar { transform: none; }
+.mini-bar .jar-box svg { width: 44px; height: auto; display: block; overflow: visible; }
+.mb-nums { min-width: 0; line-height: 1.2; }
+.mb-pt { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mini-bar .of { font-size: 14px; color: var(--sub); font-weight: 700; }
+.mb-w { font-size: 12px; color: var(--sub); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mini-bar .status { margin-top: 3px; padding: 2px 8px; font-size: 12px; }
 .status {
   display: inline-block; margin-top: 6px; padding: 4px 10px; border-radius: 999px;
   font-size: 14px; font-weight: 700;
@@ -215,7 +230,3 @@ body.editing .card-main { cursor: default; }
 .sheet-btns .primary { flex: 1.6 1 0; background: var(--accent); border-color: var(--accent); color: #fff; }
 .sheet-btns .primary:disabled { opacity: .45; cursor: default; }
 
-@media (max-width: 370px) {
-  .big { font-size: 38px; }
-  .jar-col, .jar-box svg { width: 92px; }
-}

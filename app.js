@@ -144,15 +144,16 @@
   var reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   function animateJar(pos, g) {
-    var svg = document.querySelector('#mainJar svg');
+    var svgs = Array.prototype.slice.call(document.querySelectorAll('#mainJar svg, #miniJar svg'));
     var old = prevPos;
     prevPos = pos;
-    if (reduceMotion || !svg || !svg.animate || !g) return;
+    if (reduceMotion || !svgs.length || !svgs[0].animate || !g) return;
     var keys = Object.keys(pos).sort(function (a, b) { return pos[a].i - pos[b].i; });
     var drops = 0, lastEnd = 0, topY = -30;
     keys.forEach(function (k) {
-      var el = svg.querySelector('[data-k="' + k + '"]');
-      if (!el) return;
+      var els = svgs.map(function (s) { return s.querySelector('[data-k="' + k + '"]'); }).filter(Boolean);
+      if (!els.length) return;
+      var el = { animate: function (f, o) { els.forEach(function (e) { e.animate(f, o); }); } };
       var p = pos[k], o = old[k];
       if (!o) {
         var delay = Math.min(drops * 55, 1400);
@@ -179,26 +180,30 @@
     });
     if (drops) {
       pourUntil = Date.now() + lastEnd;
-      svg.classList.add('pouring');
+      svgs.forEach(function (s) { s.classList.add('pouring'); });
       clearTimeout(pourTimer);
       pourTimer = setTimeout(function () {
-        var s = document.querySelector('#mainJar svg');
-        if (s) s.classList.remove('pouring');
+        document.querySelectorAll('#mainJar svg, #miniJar svg').forEach(function (s) { s.classList.remove('pouring'); });
       }, lastEnd);
     }
   }
 
   // ---------- 描画 ----------
   var $ = function (id) { return document.getElementById(id); };
+  function setAll(sel, text, cls) {
+    document.querySelectorAll(sel).forEach(function (el) { el.textContent = text; if (cls) el.className = cls; });
+  }
+  var jarVisible = true;
+  function showJar() { // プレビュー時は大きいジャーが見える位置へ
+    if (!jarVisible) window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
 
   function render() {
     var total = C.totalWatts(A, state);
     var lv = C.level(total);
-    $('pt').textContent = C.toPoints(total);
-    $('watts').textContent = fmt(total) + 'W / ' + fmt(C.LIMIT_W) + 'W';
-    var st = $('status');
-    st.textContent = statusText(total);
-    st.className = 'status ' + lv;
+    setAll('.js-pt', C.toPoints(total));
+    setAll('.js-watts', fmt(total) + 'W / ' + fmt(C.LIMIT_W) + 'W');
+    setAll('.js-status', statusText(total), 'status js-status ' + lv);
     document.body.dataset.level = lv;
 
     // メインのジャー（プレビュー中は「追加後」をうすい粒で）
@@ -214,9 +219,11 @@
     }
     var jl = C.level(jarTotal);
     var pos = {}, go = {};
-    $('mainJar').innerHTML = jarSVG({ cols: 6, rows: 5, s: 16, items: items, capLine: true, extraRows: 3, topPad: 34,
+    var jarHtml = jarSVG({ cols: 6, rows: 5, s: 16, items: items, capLine: true, extraRows: 3, topPad: 34,
       posOut: pos, geomOut: go,
       cls: 'main lv-' + jl + (jl === 'over' ? ' popped' : '') + (Date.now() < pourUntil ? ' pouring' : '') });
+    $('mainJar').innerHTML = jarHtml;
+    $('miniJar').innerHTML = jarHtml;
     animateJar(pos, go.g);
     $('jarCaption').textContent = preview ? 'うすい粒＝追加分（予測）' : '1粒 = 1pt = 100W';
 
@@ -310,12 +317,14 @@
       if (state.on[id]) {
         if (t.dataset.mode === C.selectedModeId(byId[id], state)) return;
         preview = { id: id, modeId: t.dataset.mode }; // 使用中ならまずプレビュー
+        showJar();
       } else {
         state.mode[id] = t.dataset.mode; save();
         if (preview && preview.id === id) preview.modeId = t.dataset.mode;
       }
     } else if (act === 'whatif') {
       preview = { id: id, modeId: C.selectedModeId(byId[id], state) };
+      showJar();
     } else if (act === 'pmode') {
       preview.modeId = t.dataset.mode;
     } else if (act === 'commit') {
@@ -352,6 +361,14 @@
     if (!confirm('編集した W をすべて初期値に戻します。よろしいですか？')) return;
     state.watts = {}; save(); render();
   });
+
+  // 大きいジャーが画面から外れたら、上に小さいバーを出す
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) {
+      jarVisible = es[0].intersectionRatio >= 0.35;
+      document.body.classList.toggle('show-mini', !jarVisible);
+    }, { threshold: [0, 0.35, 1] }).observe($('mainJar'));
+  }
 
   render();
 })();
